@@ -1,8 +1,14 @@
 require('dotenv').config();
-const { ApolloServer } = require('apollo-server');
+const fs = require('fs');
+const path = require('path');
+const { ApolloServer, gql } = require('apollo-server');
 const connectDB = require('./config/db');
-const typeDefs = require('./schemas/schema');
 const resolvers = require('./resolvers/taskResolvers');
+
+// ✅ Read schema.graphql as string and wrap with gql
+const typeDefs = gql(
+  fs.readFileSync(path.join(__dirname, 'schemas', 'schema.graphql'), 'utf8')
+);
 
 connectDB();
 
@@ -19,6 +25,6 @@ const server = new ApolloServer({
 
 const PORT = process.env.PORT || 4000;
 
-server.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}/graphql`);
+server.listen(PORT).then(({ url }) => {
+  console.log(`Server running at ${url}`);
 });
