@@ -1,6 +1,6 @@
 import { useQuery, useMutation, gql } from '@apollo/client';
 import { useRouter } from 'next/router';
-import { format } from 'date-fns';
+import { format, isValid } from 'date-fns';
 import { FiArrowLeft, FiCalendar, FiCircle, FiClock, FiCheckCircle } from 'react-icons/fi';
 
 const GET_TASK = gql`
@@ -31,6 +31,12 @@ const statusIcons = {
   'In Progress': <FiClock className="text-blue-500" />,
   'Done': <FiCheckCircle className="text-green-500" />,
 };
+
+// ✅ Safe formatter to prevent crashes
+function safeFormatDate(dateString, formatStr = 'MMM dd, yyyy') {
+  const date = new Date(dateString);
+  return isValid(date) ? format(date, formatStr) : 'Invalid date';
+}
 
 export default function TaskDetails() {
   const router = useRouter();
@@ -76,7 +82,7 @@ export default function TaskDetails() {
           </div>
           <div className="flex items-center text-gray-500">
             <FiCalendar className="mr-1" />
-            <span>{format(new Date(task.dueDate), 'MMM dd, yyyy')}</span>
+            <span>{safeFormatDate(task.dueDate)}</span>
           </div>
         </div>
 
@@ -104,7 +110,7 @@ export default function TaskDetails() {
           </div>
 
           <div className="text-sm text-gray-500">
-            <p>Created: {format(new Date(task.createdAt), 'MMM dd, yyyy HH:mm')}</p>
+            <p>Created: {safeFormatDate(task.createdAt, 'MMM dd, yyyy HH:mm')}</p>
           </div>
         </div>
       </div>

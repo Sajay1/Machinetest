@@ -1,7 +1,7 @@
 import { useQuery, gql } from '@apollo/client';
 import { useState } from 'react';
 import Link from 'next/link';
-import { format } from 'date-fns';
+import { format, isValid } from 'date-fns';
 import { FiPlus, FiCalendar, FiCircle, FiClock, FiCheckCircle } from 'react-icons/fi';
 
 const GET_TASKS = gql`
@@ -20,6 +20,12 @@ const statusIcons = {
   'In Progress': <FiClock className="text-blue-500" />,
   'Done': <FiCheckCircle className="text-green-500" />,
 };
+
+// ✅ Safe formatter
+function safeFormatDate(dateString, fallback = 'No due date') {
+  const date = new Date(dateString);
+  return isValid(date) ? format(date, 'MMM dd, yyyy') : fallback;
+}
 
 export default function TaskList() {
   const [statusFilter, setStatusFilter] = useState('');
@@ -69,7 +75,7 @@ export default function TaskList() {
                   </div>
                   <div className="flex items-center text-gray-500">
                     <FiCalendar className="mr-1" />
-                    <span>{format(new Date(task.dueDate), 'MMM dd, yyyy')}</span>
+                    <span>{safeFormatDate(task.dueDate)}</span>
                   </div>
                 </div>
                 <div className="mt-2">
