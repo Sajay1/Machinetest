@@ -51,6 +51,20 @@ const resolvers = {
         throw new Error('Failed to update task status');
       }
     },
+  deleteTask: async (_, { id }) => {
+  console.log('Deleting task with id:', id);
+  try {
+    const task = await Task.findByIdAndDelete(id);
+    if (!task) {
+      throw new Error('Task not found');
+    }
+    console.log('Deleted task:', task);
+    return task;
+  } catch (error) {
+    console.error('Delete task error:', error);
+    throw new Error(`Failed to delete task: ${error.message}`);
+  }
+},
   },
 };
 

@@ -1,8 +1,9 @@
-import { useQuery, gql } from '@apollo/client';
+import { useQuery,useMutation, gql } from '@apollo/client';
 import { useState } from 'react';
 import Link from 'next/link';
 import { format, isValid } from 'date-fns';
 import { FiPlus, FiCalendar, FiCircle, FiClock, FiCheckCircle } from 'react-icons/fi';
+
 
 const GET_TASKS = gql`
   query Tasks($status: String) {
@@ -15,23 +16,30 @@ const GET_TASKS = gql`
   }
 `;
 
+
 const statusIcons = {
   'Todo': <FiCircle className="text-gray-400" />,
   'In Progress': <FiClock className="text-blue-500" />,
   'Done': <FiCheckCircle className="text-green-500" />,
 };
 
-// ✅ Safe formatter
+
 function safeFormatDate(dateString, fallback = 'No due date') {
   const date = new Date(dateString);
   return isValid(date) ? format(date, 'MMM dd, yyyy') : fallback;
 }
 
 export default function TaskList() {
+
+
   const [statusFilter, setStatusFilter] = useState('');
   const { loading, error, data } = useQuery(GET_TASKS, {
     variables: { status: statusFilter || undefined },
   });
+
+
+
+
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error.message}</p>;
@@ -61,7 +69,7 @@ export default function TaskList() {
         </select>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-4 p-4 bg-white rounded-lg shadow-md">
         {data.tasks.length === 0 ? (
           <p>No tasks found</p>
         ) : (
@@ -79,13 +87,18 @@ export default function TaskList() {
                   </div>
                 </div>
                 <div className="mt-2">
-                  <span className={`px-2 py-1 text-xs rounded-full ${
-                    task.status === 'Todo' ? 'bg-gray-100 text-gray-800' :
-                    task.status === 'In Progress' ? 'bg-blue-100 text-blue-800' :
-                    'bg-green-100 text-green-800'
-                  }`}>
-                    {task.status}
-                  </span>
+                 <span
+  className={`px-2 py-1 text-xs rounded-full ${
+    {
+      'Todo': 'bg-gray-100 text-gray-800',
+      'In Progress': 'bg-blue-100 text-blue-800',
+      'Done': 'bg-green-100 text-green-800',
+    }[task.status] || 'bg-gray-50 text-gray-500'
+  }`}
+>
+  {task.status}
+</span>
+
                 </div>
               </div>
             </Link>

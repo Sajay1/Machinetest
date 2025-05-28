@@ -25,6 +25,14 @@ const UPDATE_TASK_STATUS = gql`
   }
 `;
 
+const DELETE_TASK = gql`
+  mutation DeleteTask($id: ID!) {
+    deleteTask(id: $id) {
+      id
+    }
+  }
+`;
+
 const statusOptions = ['Todo', 'In Progress', 'Done'];
 const statusIcons = {
   'Todo': <FiCircle className="text-gray-400" />,
@@ -32,11 +40,12 @@ const statusIcons = {
   'Done': <FiCheckCircle className="text-green-500" />,
 };
 
-// ✅ Safe formatter to prevent crashes
-function safeFormatDate(dateString, formatStr = 'MMM dd, yyyy') {
+
+function safeFormatDate(dateString, formatStr = 'MMM dd, yyyy', fallback = 'No due date') {
   const date = new Date(dateString);
-  return isValid(date) ? format(date, formatStr) : 'Invalid date';
+  return isValid(date) ? format(date, formatStr) : fallback;
 }
+
 
 export default function TaskDetails() {
   const router = useRouter();
@@ -50,6 +59,24 @@ export default function TaskDetails() {
   const [updateTaskStatus] = useMutation(UPDATE_TASK_STATUS, {
     refetchQueries: [{ query: GET_TASK, variables: { id } }],
   });
+
+   const [deleteTask] = useMutation(DELETE_TASK);
+
+
+   const handleDelete = async (id) => {
+     const confirmed = confirm('Are you sure you want to delete this task?');
+     if (!confirmed) return;
+   
+     try {
+       const { data } = await deleteTask({ variables: { id } });
+       console.log('Task deleted:', data.deleteTask.id);
+       // Optionally refetch or update cache here
+     } catch (error) {
+       console.error('Delete error:', error);
+     }
+   };
+   
+   
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error.message}</p>;
@@ -110,8 +137,9 @@ export default function TaskDetails() {
           </div>
 
           <div className="text-sm text-gray-500">
-            <p>Created: {safeFormatDate(task.createdAt, 'MMM dd, yyyy HH:mm')}</p>
+<p>Created: {safeFormatDate(task.createdAt, 'MMM dd, yyyy HH:mm', 'Unknown')}</p>
           </div>
+            <button onClick={() => handleDelete(task.id)}>Delete</button>
         </div>
       </div>
     </div>
